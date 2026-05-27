@@ -1,6 +1,8 @@
 return {
   'nvim-telescope/telescope.nvim',
-  tag = '0.1.8',
+  -- Track master: the nvim-treesitter "main" branch previewer fix is not yet
+  -- in a tagged release (latest tag 0.1.8 predates it).
+  branch = 'master',
   config = function ()
     local actions = require("telescope.actions")
     local telescope = require("telescope")
