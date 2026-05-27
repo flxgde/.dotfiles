@@ -1,2 +1,9 @@
 #!/usr/bin/env bash
-exec /home/flxg/.local/bin/tmux-sessionizer "$HOME"
+# Ghostty launches us with `bash --noprofile --norc`, so the shell profile
+# never runs and PATH is minimal. Prepend the dirs where tmux may live.
+for dir in /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin"; do
+    [[ -d $dir ]] && PATH="$dir:$PATH"
+done
+export PATH
+
+exec "$HOME/.local/bin/tmux-sessionizer" "$HOME"

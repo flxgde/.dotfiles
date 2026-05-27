@@ -26,7 +26,7 @@ async-backend = epoll
 macos-option-as-alt = true
 
 # Auto-launch tmux sessionizer on home directory
-command = /home/flxg/.local/bin/tmux-home
+command = ~/.local/bin/tmux-home
 
 # Keybinds
 keybind = shift+enter=text:\x1b\r
