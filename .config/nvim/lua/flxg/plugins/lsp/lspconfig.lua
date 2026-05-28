@@ -15,16 +15,7 @@ return {
     },
   },
   config = function()
-    -- import lspconfig plugin
-    local lspconfig = require("lspconfig")
-
-    -- import mason_lspconfig plugin
-    local mason_lspconfig = require("mason-lspconfig")
-    local mason_registry = require("mason-registry")
-
-    -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
-
     local keymap = vim.keymap -- for conciseness
 
     vim.api.nvim_create_autocmd("LspAttach", {
@@ -37,6 +28,26 @@ return {
         -- set keybinds
         opts.desc = "Show LSP references"
         keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
+
+        -- ts_ls and angularls both answer textDocument/references, so the
+        -- default quickfix list ends up with every entry duplicated. Dedupe.
+        opts.desc = "Show LSP references (quickfix, deduped)"
+        keymap.set("n", "grr", function()
+          vim.lsp.buf.references(nil, {
+            on_list = function(list)
+              local seen, items = {}, {}
+              for _, item in ipairs(list.items) do
+                local key = string.format("%s:%d:%d", item.filename, item.lnum, item.col)
+                if not seen[key] then
+                  seen[key] = true
+                  table.insert(items, item)
+                end
+              end
+              vim.fn.setqflist({}, " ", { title = list.title, items = items })
+              vim.cmd("botright copen")
+            end,
+          })
+        end, opts)
 
         opts.desc = "Go to declaration"
         keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
@@ -72,7 +83,16 @@ return {
         keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
         opts.desc = "Restart LSP"
-        keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+        keymap.set("n", "<leader>rs", function()
+          local bufnr = vim.api.nvim_get_current_buf()
+          for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+            local config = client.config
+            vim.lsp.stop_client(client.id)
+            vim.defer_fn(function()
+              vim.lsp.start(config, { bufnr = bufnr })
+            end, 500)
+          end
+        end, opts) -- restart lsp clients attached to the current buffer
       end,
     })
 
@@ -105,93 +125,32 @@ return {
       },
     })
 
-    mason_lspconfig.setup({
-      handlers = {
-        -- default handler for installed servers 
-        function(server_name)
-          lspconfig[server_name].setup({
-            capabilities = capabilities,
-          })
-        end,
-        ["svelte"] = function()
-          -- configure svelte server
-          lspconfig["svelte"].setup({
-            capabilities = capabilities,
-            on_attach = function(client, bufnr)
-              vim.api.nvim_create_autocmd("BufWritePost", {
-                pattern = { "*.js", "*.ts" },
-                callback = function(ctx)
-                  -- Here use ctx.match instead of ctx.file
-                  client.notify("$/onDidChangeTsOrJsFile", { uri = ctx.match })
-                end,
-              })
-            end,
-          })
-        end,
-        ["graphql"] = function()
-          -- configure graphql language server
-          lspconfig["graphql"].setup({
-            capabilities = capabilities,
-            filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
-          })
-        end,
-        ["emmet_ls"] = function()
-          -- configure emmet language server
-          lspconfig["emmet_ls"].setup({
-            capabilities = capabilities,
-            filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
-          })
-        end,
-        ["angularls"] = function ()
-          -- configure angularls server
-          local angularls_path = mason_registry.get_package('angular-language-server'):get_install_path()
-          local cmd = {
-            'ngserver',
-            '--stdio',
-            '--tsProbeLocations',
-            table.concat({
-              angularls_path,
-              vim.uv.cwd(),
-            }, ','),
-            '--ngProbeLocations',
-            table.concat({
-              angularls_path .. '/node_modules/@angular/language-server',
-              vim.uv.cwd(),
-            }, ','),
-          }
+    -- Server installation and enabling are handled by mason-lspconfig
+    -- (ensure_installed + automatic_enable). Here we only define config that
+    -- deep-merges onto nvim-lspconfig's bundled lsp/<name>.lua specs.
 
-          lspconfig["angularls"].setup({
-            capabilities = capabilities,
-            cmd = cmd,
-            on_new_config = function(new_config, new_root_dir)
-              new_config.cmd = cmd
-            end,
-          })
-        end,
-        ["lua_ls"] = function()
-          -- configure lua server (with special settings)
-          lspconfig["lua_ls"].setup({
-            capabilities = capabilities,
-            root_dir = function(fname)
-              -- climb directories looking for .git or init.lua
-              return lspconfig.util.find_git_ancestor(fname)
-                or lspconfig.util.root_pattern("init.lua")(fname)
-                or vim.uv.os_homedir()
-            end,
-            settings = {
-              Lua = {
-                runtime = { version = "LuaJIT" },
-                diagnostics = { globals = { "vim" } },
-                completion = { callSnippet = "Replace" },
-                workspace = {
-                  library = vim.api.nvim_get_runtime_file("", true),
-                  checkThirdParty = false
-                },
-              },
-            },
-          })
-        end,
-      }
+    -- Apply cmp completion capabilities to every server.
+    vim.lsp.config("*", { capabilities = capabilities })
+
+    -- angularls and svelte are left to the bundled configs: the former now
+    -- derives cmd/probe paths and the Angular version itself, the latter
+    -- already ships the $/onDidChangeTsOrJsFile reload workaround.
+
+    vim.lsp.config("graphql", {
+      filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
+    })
+
+    vim.lsp.config("emmet_ls", {
+      filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
+    })
+
+    vim.lsp.config("lua_ls", {
+      settings = {
+        Lua = {
+          completion = { callSnippet = "Replace" },
+          diagnostics = { globals = { "vim" } },
+        },
+      },
     })
   end,
 }
