@@ -6,5 +6,3 @@ done
 
 # Optional per-machine overrides
 [[ -r ~/.aliases ]] && source ~/.aliases
-
-# Add your own exports, aliases, and functions here.

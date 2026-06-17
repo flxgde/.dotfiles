@@ -59,26 +59,8 @@ if [[ $(uname) != "Darwin" ]] && [[ -n "$NVM_DIR" ]]; then
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 fi
 
-# SDKMAN
-[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 
-# ── ZLE widgets & keybindings ─────────────────────────────────
-
-# Ctrl+F → tmux-sessionizer
-tmux-sessionizer-widget() {
-  BUFFER="tmux-sessionizer"
-  zle accept-line
-}
-zle -N tmux-sessionizer-widget
-bindkey '^f' tmux-sessionizer-widget
-
-# Esc Esc → tmux-switch-session
-tmux-switcher-widget() {
-  BUFFER="tmux-switch-session"
-  zle accept-line
-}
-zle -N tmux-switcher-widget
-bindkey '\e\e' tmux-switcher-widget
+# ── keybindings ─────────────────────────────────
 
 # Alt+P → reload .zshrc
 configreload-widget() {
@@ -87,3 +69,8 @@ configreload-widget() {
 }
 zle -N configreload-widget
 bindkey '\ep' configreload-widget
+
+
+# ── sdkman ─────────────────────────────────
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"

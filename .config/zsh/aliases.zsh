@@ -32,5 +32,5 @@ if command -v xdg-open &> /dev/null; then
 fi
 
 # Tools
-alias cx='printf "\033[2J\033[3J\033[H" && claude --allow-dangerously-skip-permissions'
 alias d='docker'
+alias k='kubectl'
