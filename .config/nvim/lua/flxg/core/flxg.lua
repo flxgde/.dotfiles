@@ -19,7 +19,14 @@ function vim.flxg.ngjump()
   end
 end
 
-function vim.flxg.duplicate() 
+function vim.flxg.nggc()
+  local name = vim.fn.input("Component name: ")
+  if name ~= "" then
+    vim.cmd("!ng g c " .. name)
+  end
+end
+
+function vim.flxg.duplicate()
   -- Get the current file full path
   local filepath = vim.fn.expand('%:p')
   if filepath == '' then

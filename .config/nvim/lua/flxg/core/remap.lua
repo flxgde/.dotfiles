@@ -11,11 +11,35 @@ keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) 
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })                    -- make split windows equal width & height
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })               -- close current split window
 
-keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })                     -- open new tab
-keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })              -- close current tab
-keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })                     --  go to next tab
-keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })                 --  go to previous tab
-keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+-- Terminal at root (new buffer)
+vim.keymap.set("n", "<leader>tr", function()
+  vim.cmd("lcd " .. vim.fn.fnameescape(vim.fn.getcwd()))
+  vim.cmd("terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal at root (new buffer)" })
+
+-- Terminal at file (new buffer)
+vim.keymap.set("n", "<leader>tf", function()
+  vim.cmd("lcd " .. vim.fn.fnameescape(vim.fn.expand("%:p:h")))
+  vim.cmd("terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal at file (new buffer)" })
+
+-- Terminal at root (split)
+vim.keymap.set("n", "<leader>tsr", function()
+  vim.cmd("split")
+  vim.cmd("lcd " .. vim.fn.fnameescape(vim.fn.getcwd()))
+  vim.cmd("terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal at root (split)" })
+
+-- Terminal at file (split)
+vim.keymap.set("n", "<leader>tsf", function()
+  vim.cmd("split")
+  vim.cmd("lcd " .. vim.fn.fnameescape(vim.fn.expand("%:p:h")))
+  vim.cmd("terminal")
+  vim.cmd("startinsert")
+end, { desc = "Terminal at file (split)" })
 
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
@@ -46,6 +70,7 @@ keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left
 -- keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
 
 keymap.set("n", "<leader>ga", vim.flxg.ngjump, { desc = "Jump between .ts and .html" })
+keymap.set("n", "<leader>gc", vim.flxg.nggc, { desc = "Generate Angular component" })
 keymap.set("n", "<leader>pd", vim.flxg.duplicate, { desc = "Duplicates current file at specified path" })
 
 keymap.set("n", "<leader>qo", "<cmd>copen<CR>", { desc = "Open quickfix" })
@@ -71,4 +96,7 @@ keymap.set("i", "<A-A>", "Ä")
 keymap.set("i", "<A-O>", "Ö")
 keymap.set("i", "<A-U>", "Ü")
 keymap.set("i", "<A-s>", "ß")
+
+-- Terminal Escape
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
