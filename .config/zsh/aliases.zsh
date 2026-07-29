@@ -34,3 +34,5 @@ fi
 # Tools
 alias d='docker'
 alias k='kubectl'
+
+alias vim='nvim'
