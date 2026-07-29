@@ -15,6 +15,7 @@ gtk-toolbar-style = flat
 # Cursor
 cursor-style = block
 cursor-style-blink = false
+custom-shader = ~/.config/ghostty/shaders/cursor_frozen.glsl
 
 # Shell integration (keeps terminfo on SSH)
 shell-integration-features = no-cursor,ssh-env
@@ -32,3 +33,10 @@ command = ~/.local/bin/tmux-home
 keybind = shift+enter=text:\x1b\r
 keybind = shift+insert=paste_from_clipboard
 keybind = control+insert=copy_to_clipboard
+
+# Send CSI u sequences for Ctrl+1-5 so they reach Neovim through tmux
+keybind = ctrl+one=text:\x1b[49;5u
+keybind = ctrl+two=text:\x1b[50;5u
+keybind = ctrl+three=text:\x1b[51;5u
+keybind = ctrl+four=text:\x1b[52;5u
+keybind = ctrl+five=text:\x1b[53;5u
