@@ -35,9 +35,14 @@ fi
 selected_name=$(basename "$selected" | tr . _)
 tmux_running=$(pgrep tmux)
 
+# tmux session IDs ($0, $1, ...) are assigned in creation order and never
+# reused, so bootstrapping dotfiles then home first (only on a cold server
+# start) is what keeps dotfiles pinned to $0 and home to $1.
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s "$selected_name" -c "$selected"
-    exit 0
+    dotfiles_name=$(basename "$HOME/.dotfiles" | tr . _)
+    home_name=$(basename "$HOME" | tr . _)
+    tmux new-session -ds "$dotfiles_name" -c "$HOME/.dotfiles"
+    tmux new-session -ds "$home_name" -c "$HOME"
 fi
 
 if ! tmux has-session -t="$selected_name" 2>/dev/null; then

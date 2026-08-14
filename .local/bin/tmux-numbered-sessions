@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Sessions eligible for `prefix + s` then a digit. Home and dotfiles are
+# reserved for their own dedicated switches (prefix+q / prefix+w) and are
+# excluded here so the numbers stay stable for everything else.
+
+HOME_NAME=$(basename "$HOME" | tr . _)
+DOTFILES_NAME=$(basename "$HOME/.dotfiles" | tr . _)
+
+tmux list-sessions -F '#{session_name}' 2>/dev/null \
+    | awk -v h="$HOME_NAME" -v d="$DOTFILES_NAME" '$0 != h && $0 != d'

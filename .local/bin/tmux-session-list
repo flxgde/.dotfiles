@@ -1,15 +1,40 @@
 #!/usr/bin/env bash
 # Print tmux sessions separated by spaces, highlighting the current one.
 # Consumed by tmux status-right: `#(~/.local/bin/tmux-session-list)`.
+# Home and dotfiles are pinned to prefix+q / prefix+w (see tmux.conf) and
+# shown with those labels instead of a number.
 
 current=$(tmux display-message -p '#S' 2>/dev/null) || exit 0
 
-i=1
-tmux list-sessions -F '#S' 2>/dev/null | while read -r s; do
+HOME_NAME=$(basename "$HOME" | tr . _)
+DOTFILES_NAME=$(basename "$HOME/.dotfiles" | tr . _)
+
+print_session() {
+  local label=$1 s=$2
   if [ "$s" = "$current" ]; then
-    printf '#[fg=blue,bold]%d:%s#[default] ' "$i" "$s"
+    printf '#[fg=blue,bold]%s:%s#[default] ' "$label" "$s"
   else
-    printf '#[fg=brightblack]%d:%s#[default] ' "$i" "$s"
+    printf '#[fg=brightblack]%s:%s#[default] ' "$label" "$s"
   fi
+}
+
+sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
+
+has_session() {
+  local name=$1 s
+  while read -r s; do
+    [ "$s" = "$name" ] && return 0
+  done <<<"$sessions"
+  return 1
+}
+
+has_session "$HOME_NAME" && print_session q "$HOME_NAME"
+has_session "$DOTFILES_NAME" && print_session w "$DOTFILES_NAME"
+
+i=1
+while read -r s; do
+  [ "$s" = "$HOME_NAME" ] && continue
+  [ "$s" = "$DOTFILES_NAME" ] && continue
+  print_session "$i" "$s"
   i=$((i + 1))
-done
+done <<<"$sessions"
