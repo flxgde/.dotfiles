@@ -27,7 +27,11 @@ return {
     mason_lspconfig.setup({
       -- list of servers for mason to install
       ensure_installed = {
-        "angularls",
+        -- Pinned: @angular/language-server 22.x (released alongside Angular
+        -- v22) breaks hover/completions/diagnostics against pre-v22 projects
+        -- (silent failures, no server-side errors). Bump this once your
+        -- projects are on Angular 22, or drop the pin entirely.
+        "angularls@21.2.18",
         "ansiblels",
         "ts_ls",
         "html",

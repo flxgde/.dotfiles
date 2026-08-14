@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
 
-
-
-
-# Merge, remove duplicates, and feed to fzf
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    # Static roots
-   	STATIC_DIRS=$(find ~/code ~/ ~/.config -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
-   
-   	# Zoxide frecent dirs
-   	Z_DIRS=$(zoxide query -l 2>/dev/null)
+    STATIC_DIRS=$(find ~/code ~/ ~/.config \
+        \( -name "node_modules" -o -name ".git" -o -name "target" -o -name ".cache" \) -prune -o \
+        -mindepth 1 -maxdepth 2 -type d -print 2>/dev/null)
+
+    Z_DIRS=$(zoxide query -l 2>/dev/null)
 
     selected=$(printf "%s\n%s\n" "$Z_DIRS" "$STATIC_DIRS" \
-      | awk '!seen[$0]++' \
-      | fzf --preview '
-        if [ -d {} ]; then
-            if [ -d "{}/.git" ]; then
-                git -C {} status -sb 2>/dev/null || tree -L 1 {}
-            else
-                tree -L 1 {}
-            fi
-        fi
-      ')
+        | awk '!seen[$0]++' \
+        | fzf \
+            --reverse \
+            --color="header:italic,border:#908caa,pointer:#9ccfd8,marker:#eb6f92" \
+            --border=rounded \
+            --ignore-case \
+            --info=hidden \
+            --preview='
+                if [ -d "{}/.git" ]; then
+                    git -C {} status -sb 2>/dev/null || tree -C -L 3 {}
+                else
+                    tree -C -L 3 {}
+                fi
+            ' \
+            --preview-border=left \
+            --preview-window=right:50%:wrap)
 fi
-
 
 if [[ -z $selected ]]; then
     exit 0
@@ -35,12 +36,12 @@ selected_name=$(basename "$selected" | tr . _)
 tmux_running=$(pgrep tmux)
 
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
+    tmux new-session -s "$selected_name" -c "$selected"
     exit 0
 fi
 
-if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected"
 fi
 
 if [[ -z $TMUX ]]; then

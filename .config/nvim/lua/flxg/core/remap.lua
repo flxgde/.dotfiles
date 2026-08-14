@@ -1,11 +1,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 local keymap = vim.keymap
-keymap.set("n", "<leader>pv", vim.cmd.Ex, { desc = "Open tree" })
-keymap.set("n", "<leader>pc", function()
-	vim.cmd("Lexplore " .. vim.fn.expand("%:p:h"))
-end, { desc = "Open tree and center current file" })
-
 keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })                   -- split window vertically
 keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })                 -- split window horizontally
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })                    -- make split windows equal width & height
@@ -99,4 +94,68 @@ keymap.set("i", "<A-s>", "ß")
 
 -- Terminal Escape
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
+-- Pseudo-restart helpers
+local function _all_saved()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].modified then
+      vim.notify("Unsaved buffers — save all first.", vim.log.levels.WARN)
+      return false
+    end
+  end
+  return true
+end
+
+local function _reload_config()
+  for name in pairs(package.loaded) do
+    if name:match("^flxg") then package.loaded[name] = nil end
+  end
+  require("flxg.core")
+end
+
+local function _reload_bufs()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf) and vim.fn.bufname(buf) ~= "" then
+      vim.api.nvim_buf_call(buf, function() vim.cmd("edit") end)
+    end
+  end
+end
+
+-- <leader>Rc — reload config (options, keymaps, utilities; skips lazy/plugins)
+keymap.set("n", "<leader>Rc", function()
+  _reload_config()
+  vim.notify("Config reloaded.", vim.log.levels.INFO)
+end, { desc = "Reload config" })
+
+-- <leader>Rb — reload buffers from disk (requires all saved)
+keymap.set("n", "<leader>Rb", function()
+  if not _all_saved() then return end
+  _reload_bufs()
+  vim.notify("Buffers reloaded.", vim.log.levels.INFO)
+end, { desc = "Reload buffers from disk" })
+
+-- <leader>Rl — restart LSP without touching buffer content
+-- Re-triggers FileType so servers re-attach; safe with unsaved changes.
+keymap.set("n", "<leader>Rl", function()
+  vim.lsp.stop_client(vim.lsp.get_clients())
+  vim.defer_fn(function()
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(buf) and vim.fn.bufname(buf) ~= "" then
+        vim.api.nvim_exec_autocmds("FileType", { buf = buf })
+      end
+    end
+    vim.notify("LSP restarted.", vim.log.levels.INFO)
+  end, 500)
+end, { desc = "Restart LSP" })
+
+-- <leader>Ra — all: config + LSP + buffers (requires all saved)
+keymap.set("n", "<leader>Ra", function()
+  if not _all_saved() then return end
+  _reload_config()
+  vim.lsp.stop_client(vim.lsp.get_clients())
+  vim.defer_fn(function()
+    _reload_bufs() -- :edit fires FileType → LSP re-attaches
+    vim.notify("Pseudo-restart complete.", vim.log.levels.INFO)
+  end, 500)
+end, { desc = "Pseudo-restart: config + LSP + buffers" })
 

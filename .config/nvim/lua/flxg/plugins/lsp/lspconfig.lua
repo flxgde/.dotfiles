@@ -132,9 +132,11 @@ return {
     -- Apply cmp completion capabilities to every server.
     vim.lsp.config("*", { capabilities = capabilities })
 
-    -- angularls and svelte are left to the bundled configs: the former now
-    -- derives cmd/probe paths and the Angular version itself, the latter
-    -- already ships the $/onDidChangeTsOrJsFile reload workaround.
+    -- Disabled: built-in inline color swatches (cssls/tailwindcss) hit a
+    -- core race where a buffer edit re-requests colors from a client that
+    -- was just stopped (e.g. via the LSP restart keymap above), crashing
+    -- with "assertion failed!" in document_color.lua.
+    vim.lsp.document_color.enable(false)
 
     vim.lsp.config("graphql", {
       filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },

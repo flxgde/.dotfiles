@@ -36,3 +36,8 @@ alias d='docker'
 alias k='kubectl'
 
 alias vim='nvim'
+
+# IntelliJ shell integration (macOS only)
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  alias idea='open -na "/Applications/IntelliJ IDEA.app" --args'
+fi

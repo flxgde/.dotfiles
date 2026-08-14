@@ -23,7 +23,3 @@ if [[ -d "$HOME/.local/share/omarchy" ]]; then
   export PATH="$OMARCHY_PATH/bin:$PATH"
 fi
 
-# Intellij shell integration on mac
-if [[ -d "/Applications/IntelliJ IDEA.app/Contents/MacOS" ]]; then
-  export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
-fi

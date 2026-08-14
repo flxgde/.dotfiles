@@ -55,7 +55,7 @@ Multi-module Maven/Gradle projects supported via `nvim-jdtls`. Project root dete
 | `<leader>fs` | Live grep |
 | `<leader>a` | Add to harpoon |
 | `<C-e>` | Harpoon menu |
-| `<C-h/t/n/s>` | Harpoon slots 1-4 |
+| `<C-1>` – `<C-5>` | Harpoon slots 1-5 |
 | `gd` | Go to definition |
 | `gR` | LSP references |
 | `<leader>ca` | Code actions |
@@ -63,6 +63,10 @@ Multi-module Maven/Gradle projects supported via `nvim-jdtls`. Project root dete
 | `<leader>xw` | Trouble workspace diagnostics |
 | `<leader>ga` | Jump between Angular .ts/.html |
 | `<leader>bd` | Close buffer |
+| `<leader>Ra` | Pseudo-restart: reload config + LSP + buffers (requires all saved) |
+| `<leader>Rc` | Reload config (options, keymaps, utilities; skips lazy/plugins) |
+| `<leader>Rb` | Reload buffers from disk (requires all saved) |
+| `<leader>Rl` | Restart LSP (safe with unsaved changes) |
 
 **Java-specific** (available in .java files):
 

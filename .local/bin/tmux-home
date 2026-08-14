@@ -6,4 +6,5 @@ for dir in /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin"; do
 done
 export PATH
 
-exec "$HOME/.local/bin/tmux-sessionizer" "$HOME"
+"$HOME/.local/bin/tmux-sessionizer" "$HOME"
+exec "$SHELL" -l
