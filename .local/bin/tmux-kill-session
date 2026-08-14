@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Kill the current session and land on home instead of whatever session
+# tmux would otherwise fall back to. Invoked by prefix+X in tmux.conf.
+
+HOME_SESSION="flxg"
+current=$1
+
+if [[ "$current" == "$HOME_SESSION" ]]; then
+    # tmux won't allow two sessions sharing a name, so the replacement is
+    # created under a temporary name first and switched to *before* the
+    # old one dies, then renamed back — the client is never left without
+    # a home to land on.
+    tmp="${HOME_SESSION}_$$"
+    tmux new-session -ds "$tmp" -c "$HOME"
+    tmux switch-client -t "$tmp"
+    tmux kill-session -t "$HOME_SESSION"
+    tmux rename-session -t "$tmp" "$HOME_SESSION"
+    exit 0
+fi
+
+tmux has-session -t="$HOME_SESSION" 2>/dev/null || tmux new-session -ds "$HOME_SESSION" -c "$HOME"
+tmux switch-client -t "$HOME_SESSION"
+tmux kill-session -t "$current"

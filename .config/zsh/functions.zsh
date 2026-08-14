@@ -1,3 +1,14 @@
+# tmux entry point: show the session switcher if a server is already
+# running (inside or outside tmux), otherwise bootstrap the default
+# (home) session.
+t() {
+  if pgrep tmux >/dev/null 2>&1; then
+    ~/.local/bin/tmux-switch-session
+  else
+    ~/.local/bin/tmux-sessionizer "$HOME"
+  fi
+}
+
 # Nvim shortcut: `n` with no args opens cwd, otherwise passes args through
 n() {
   if [ "$#" -eq 0 ]; then

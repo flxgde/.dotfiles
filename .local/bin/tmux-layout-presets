@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Shared pane-layout presets, sourced by tmux-sessionizer (new sessions)
+# and tmux-new-window (prefix+a, new window in the current session).
+# $target may be anything tmux accepts as a target (session name, window
+# id, session:window, ...) — the presets don't care which.
+
+# nvim on the left (full height, 50% width), two empty panes stacked on
+# the right (50% width, 50% height each).
+setup_layout_nvim_split() {
+    local target=$1 dir=$2
+    local left_pane
+    left_pane=$(tmux display-message -t "$target" -p '#{pane_id}')
+    tmux send-keys -t "$left_pane" 'nvim .' Enter
+    tmux split-window -h -p 50 -t "$target" -c "$dir"
+    tmux split-window -v -p 50 -t "$target" -c "$dir"
+    tmux select-pane -t "$left_pane"
+}
+
+# Single pane, nvim filling the whole window.
+setup_layout_nvim_only() {
+    local target=$1
+    tmux send-keys -t "$target" 'nvim .' Enter
+}
+
+# Three equal empty columns.
+setup_layout_triple() {
+    local target=$1 dir=$2
+    local first_pane
+    first_pane=$(tmux display-message -t "$target" -p '#{pane_id}')
+    tmux split-window -h -t "$target" -c "$dir"
+    tmux split-window -h -t "$target" -c "$dir"
+    tmux select-layout -t "$target" even-horizontal
+    tmux select-pane -t "$first_pane"
+}
+
+# Single empty pane — tmux's own default, no extra setup.
+setup_layout_blank() { :; }
+
+# Prompt (via fzf) for which preset to apply. Pressing 1-4 jumps straight
+# to and picks that entry. Empty selection (Esc/Ctrl-C) and plain Enter
+# both land on blank (the default, first item).
+choose_layout_preset() {
+    printf '%s\n' \
+        "1) blank       single empty pane" \
+        "2) nvim-split  nvim left (50%), two empty panes stacked right" \
+        "3) nvim-only   single pane, nvim ." \
+        "4) triple      three equal empty columns" \
+        | fzf \
+            --prompt="Layout> " \
+            --reverse \
+            --color="header:italic,border:#908caa,pointer:#9ccfd8,marker:#eb6f92" \
+            --border=rounded \
+            --info=hidden \
+            --height=~40% \
+            --bind='1:pos(1)+accept,2:pos(2)+accept,3:pos(3)+accept,4:pos(4)+accept' \
+        | awk '{print $2}'
+}
+
+apply_layout_preset() {
+    local preset=$1 target=$2 dir=$3
+    case "$preset" in
+        nvim-split) setup_layout_nvim_split "$target" "$dir" ;;
+        nvim-only)  setup_layout_nvim_only "$target" ;;
+        triple)     setup_layout_triple "$target" "$dir" ;;
+        *)          setup_layout_blank ;;
+    esac
+}

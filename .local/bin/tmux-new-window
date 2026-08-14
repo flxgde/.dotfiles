@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Create a new window in the current session with a chosen layout preset.
+# Invoked by prefix+a in tmux.conf, running attached inside a real popup
+# (like tmux-sessionizer), so display-message resolves the right client.
+
+source "$HOME/.local/bin/tmux-layout-presets"
+
+session=$(tmux display-message -p '#S')
+dir=$(tmux display-message -p '#{pane_current_path}')
+
+window_id=$(tmux new-window -P -F '#{window_id}' -t "$session" -c "$dir")
+apply_layout_preset "$(choose_layout_preset)" "$window_id" "$dir"

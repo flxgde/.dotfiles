@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$HOME/.local/bin/tmux-layout-presets"
+
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
@@ -42,11 +44,14 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
     dotfiles_name=$(basename "$HOME/.dotfiles" | tr . _)
     home_name=$(basename "$HOME" | tr . _)
     tmux new-session -ds "$dotfiles_name" -c "$HOME/.dotfiles"
+    setup_layout_nvim_split "$dotfiles_name" "$HOME/.dotfiles"
     tmux new-session -ds "$home_name" -c "$HOME"
+    setup_layout_nvim_split "$home_name" "$HOME"
 fi
 
 if ! tmux has-session -t="$selected_name" 2>/dev/null; then
     tmux new-session -ds "$selected_name" -c "$selected"
+    apply_layout_preset "$(choose_layout_preset)" "$selected_name" "$selected"
 fi
 
 if [[ -z $TMUX ]]; then

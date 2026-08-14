@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# fzf session switcher for prefix+s. Numbered like the old prefix+s+<digit>
+# key table: q=home, w=dotfiles (see tmux-numbered-sessions for why those
+# two are excluded from the digits), 1-9=everything else. Each key jumps
+# straight to and picks that session in one keystroke.
+
+HOME_NAME=$(basename "$HOME" | tr . _)
+DOTFILES_NAME=$(basename "$HOME/.dotfiles" | tr . _)
+current=$(tmux display-message -p '#S')
+
+lines=()
+binds=()
+pos=0
+
+add_line() {
+    local label=$1 name=$2
+    pos=$((pos + 1))
+    local marker="-"
+    [ "$name" = "$current" ] && marker=">"
+    lines+=("$label) $marker $name")
+    binds+=("$label:pos($pos)+accept")
+}
+
+tmux has-session -t="$HOME_NAME" 2>/dev/null && add_line q "$HOME_NAME"
+tmux has-session -t="$DOTFILES_NAME" 2>/dev/null && add_line w "$DOTFILES_NAME"
+
+i=1
+while read -r s; do
+    [ -z "$s" ] && continue
+    add_line "$i" "$s"
+    i=$((i + 1))
+done < <(~/.local/bin/tmux-numbered-sessions)
+
+bind_str=$(IFS=,; echo "${binds[*]}")
+
+selected=$(printf '%s\n' "${lines[@]}" \
+    | fzf \
+        --prompt="Session> " \
+        --reverse \
+        --color="header:italic,border:#908caa,pointer:#9ccfd8,marker:#eb6f92" \
+        --border=rounded \
+        --info=hidden \
+        --height=~60% \
+        --bind="$bind_str" \
+    | awk '{print $3}')
+
+[ -z "$selected" ] && exit 0
+
+tmux switch-client -t "$selected"
