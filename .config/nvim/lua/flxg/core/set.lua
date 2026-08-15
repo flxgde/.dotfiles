@@ -34,6 +34,8 @@ vim.g.loaded_netrw = 1
 opt.swapfile = false
 opt.mouse = ""
 
+opt.autoread = true -- reload unmodified buffers when the file changes on disk
+
 vim.cmd [[
   highlight LineNr guifg=#888888 guibg=NONE
 ]]
