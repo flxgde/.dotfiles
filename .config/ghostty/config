@@ -1,5 +1,5 @@
 # Dynamic theme (Omarchy theme switcher updates this file at runtime)
-config-file = ?"~/.config/omarchy/current/theme/ghostty.conf"
+config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
 
 # Font
 font-family = "DMMono Nerd Font"
@@ -40,3 +40,7 @@ keybind = ctrl+two=text:\x1b[50;5u
 keybind = ctrl+three=text:\x1b[51;5u
 keybind = ctrl+four=text:\x1b[52;5u
 keybind = ctrl+five=text:\x1b[53;5u
+# Send Shift+Enter as CSI-u so TUIs can distinguish it from Enter.
+keybind = shift+enter=csi:13;2u
+# Legacy encoding sends Alt+Shift+Enter the same as Alt+Enter; send CSI-u so tmux can match M-S-Enter.
+keybind = alt+shift+enter=csi:13;4u
