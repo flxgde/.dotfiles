@@ -10,3 +10,9 @@ dir=$(tmux display-message -p '#{pane_current_path}')
 
 window_id=$(tmux new-window -P -F '#{window_id}' -t "$session" -c "$dir")
 apply_layout_preset "$(choose_layout_preset)" "$window_id" "$dir"
+
+# Explicit select, not just relying on new-window's implicit switch: the
+# session's current window already flips while the popup is still open,
+# and tmux doesn't reliably re-target the client's view to it once the
+# popup closes.
+tmux select-window -t "$window_id"
