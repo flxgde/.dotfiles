@@ -35,6 +35,7 @@ opt.swapfile = false
 opt.mouse = ""
 
 opt.autoread = true -- reload unmodified buffers when the file changes on disk
+opt.updatetime = 300 -- default 4000ms is too slow for CursorHold-based checks (reload, gitsigns, etc.)
 
 vim.cmd [[
   highlight LineNr guifg=#888888 guibg=NONE
