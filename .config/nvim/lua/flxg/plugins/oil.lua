@@ -7,6 +7,7 @@ return {
   },
   opts = {
     default_file_explorer = true,
+    watch_for_changes = true,
     view_options = {
       show_hidden = true,
     },
