@@ -54,7 +54,6 @@ keymap.set("n", "<leader>Y", "\"+Y")
 
 keymap.set("i", "<C-c>", "<Esc>")
 keymap.set("n", "Q", "<nop>")
-keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { desc = "Format buffer" })
 
 keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
 keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")

@@ -22,6 +22,30 @@ setup_layout_nvim_only() {
     tmux send-keys -t "$target" 'nvim .' Enter
 }
 
+# nvim on the left (full height, 50% width). Right side split into claude
+# on top (66% height, resuming the last conversation for $dir if one
+# exists) and an empty pane on the bottom (33% height).
+setup_layout_nvim_claude() {
+    local target=$1 dir=$2
+    local left_pane right_pane encoded claude_cmd
+    left_pane=$(tmux display-message -t "$target" -p '#{pane_id}')
+    tmux send-keys -t "$left_pane" 'nvim .' Enter
+
+    tmux split-window -h -p 50 -t "$target" -c "$dir"
+    right_pane=$(tmux display-message -t "$target" -p '#{pane_id}')
+    tmux split-window -v -p 33 -t "$target" -c "$dir"
+
+    encoded=$(printf '%s' "$dir" | sed 's/[\/.]/-/g')
+    if ls "$HOME/.claude/projects/$encoded"/*.jsonl >/dev/null 2>&1; then
+        claude_cmd='claude -c'
+    else
+        claude_cmd='claude'
+    fi
+    tmux send-keys -t "$right_pane" "$claude_cmd" Enter
+
+    tmux select-pane -t "$left_pane"
+}
+
 # Three equal empty columns.
 setup_layout_triple() {
     local target=$1 dir=$2
@@ -45,6 +69,7 @@ choose_layout_preset() {
         "2) nvim-split  nvim left (50%), two empty panes stacked right" \
         "3) nvim-only   single pane, nvim ." \
         "4) triple      three equal empty columns" \
+        "5) nvim-claude nvim left (50%), claude top-right (66%), empty bottom-right (33%)" \
         | fzf \
             --prompt="Layout> " \
             --reverse \
@@ -52,16 +77,17 @@ choose_layout_preset() {
             --border=rounded \
             --info=hidden \
             --height=~40% \
-            --bind='1:pos(1)+accept,2:pos(2)+accept,3:pos(3)+accept,4:pos(4)+accept' \
+            --bind='1:pos(1)+accept,2:pos(2)+accept,3:pos(3)+accept,4:pos(4)+accept,5:pos(5)+accept' \
         | awk '{print $2}'
 }
 
 apply_layout_preset() {
     local preset=$1 target=$2 dir=$3
     case "$preset" in
-        nvim-split) setup_layout_nvim_split "$target" "$dir" ;;
-        nvim-only)  setup_layout_nvim_only "$target" ;;
-        triple)     setup_layout_triple "$target" "$dir" ;;
-        *)          setup_layout_blank ;;
+        nvim-split)  setup_layout_nvim_split "$target" "$dir" ;;
+        nvim-only)   setup_layout_nvim_only "$target" ;;
+        triple)      setup_layout_triple "$target" "$dir" ;;
+        nvim-claude) setup_layout_nvim_claude "$target" "$dir" ;;
+        *)           setup_layout_blank ;;
     esac
 }
