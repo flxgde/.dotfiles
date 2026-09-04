@@ -68,7 +68,13 @@ keymap.set("n", "<leader>gc", vim.flxg.nggc, { desc = "Generate Angular componen
 keymap.set("n", "<leader>pd", vim.flxg.duplicate, { desc = "Duplicates current file at specified path" })
 
 keymap.set("n", "<leader>qo", "<cmd>copen<CR>", { desc = "Open quickfix" })
-keymap.set("n", "<leader>qc", "<cmd>cclose<CR>", { desc = "Close quickfix" })
+keymap.set("n", "<leader>qc", function()
+  local ok, trouble = pcall(require, "trouble")
+  if ok and trouble.is_open() then
+    trouble.close()
+  end
+  vim.cmd("cclose")
+end, { desc = "Close quickfix" })
 
 keymap.set("n", "<leader>bd", "<cmd>bd<CR>", { desc = "Close buffer" })
 

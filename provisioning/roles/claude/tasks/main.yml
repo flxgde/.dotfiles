@@ -1,0 +1,17 @@
+---
+- name: Ensure ~/.claude directory exists
+  become: false
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.claude"
+    state: directory
+    mode: "0755"
+
+- name: Merge dotfiles-managed Claude Code hooks into settings.json
+  become: false
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ role_path }}/files/merge_hooks.py
+      {{ role_path }}/files/hooks.json
+      {{ ansible_facts['env']['HOME'] }}/.claude/settings.json
+  register: claude_hooks_merge
+  changed_when: "claude_hooks_merge.stdout.strip() == 'changed'"

@@ -1,0 +1,9 @@
+---
+- name: "Claude Code (tmux status hooks)"
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: local-bin
+      tags: [claude, local-bin]
+    - role: claude
+      tags: [claude]

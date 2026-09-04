@@ -3,18 +3,61 @@
 # Consumed by tmux status-right: `#(~/.local/bin/tmux-session-list)`.
 # Home and dotfiles are pinned to prefix+q / prefix+w (see tmux.conf) and
 # shown with those labels instead of a number.
+#
+# Sessions with a live Claude Code pane get a status icon: 🤖 while it's
+# working, 💡 once it's waiting on you — see claude-tmux-status, wired up
+# via Claude Code hooks in ~/.claude/settings.json, which write one state
+# file per tmux pane. We can't detect "claude" by process name: tmux
+# reports the resolved binary (e.g. the versioned file the `claude`
+# symlink points at), not the command it was invoked as. So instead we
+# trust the hook-written file, and only treat it as stale (skip it) once
+# the pane has reverted to a plain shell — the common case after claude
+# exits abnormally without the SessionEnd hook clearing it.
+# No associative arrays here: this runs under macOS's stock bash 3.2.
 
 current=$(tmux display-message -p '#S' 2>/dev/null) || exit 0
 
 HOME_NAME=$(basename "$HOME" | tr . _)
 DOTFILES_NAME=$(basename "$HOME/.dotfiles" | tr . _)
 
+STATUS_DIR="$HOME/.cache/tmux-claude-status"
+
+all_panes=$(tmux list-panes -a -F '#{session_name} #{pane_id} #{pane_current_command}' 2>/dev/null)
+
+claude_icon_for() {
+  local session=$1 s pane cmd state
+  local has_notify="" has_waiting="" has_busy=""
+  while read -r s pane cmd; do
+    [ "$s" = "$session" ] || continue
+    case "$cmd" in
+      zsh|bash|sh|fish|tcsh|ksh) continue ;;
+    esac
+    state=$(cat "$STATUS_DIR/$pane" 2>/dev/null) || continue
+    case "$state" in
+      notify)  has_notify=1 ;;
+      waiting) has_waiting=1 ;;
+      *)       [ -n "$state" ] && has_busy=1 ;;
+    esac
+  done <<<"$all_panes"
+  # Built via printf, never bash string concatenation: bash 3.2 silently
+  # corrupts "$a$b"-style joins of 4-byte UTF-8 sequences (these emoji
+  # all are), dropping/mangling bytes at the boundary.
+  local parts=()
+  [ -n "$has_notify" ] && parts+=("🔔")
+  [ -n "$has_waiting" ] && parts+=("💡")
+  [ -n "$has_busy" ] && parts+=("🤖")
+  [ "${#parts[@]}" -eq 0 ] && return
+  printf ' '
+  printf '%s' "${parts[@]}"
+}
+
 print_session() {
-  local label=$1 s=$2
+  local label=$1 s=$2 icon
+  icon=$(claude_icon_for "$s")
   if [ "$s" = "$current" ]; then
-    printf '#[fg=blue,bold]%s:%s#[default] ' "$label" "$s"
+    printf '#[fg=blue,bold][%s:%s%s]#[default] ' "$label" "$s" "$icon"
   else
-    printf '#[fg=brightblack]%s:%s#[default] ' "$label" "$s"
+    printf '#[fg=brightblack][%s:%s%s]#[default] ' "$label" "$s" "$icon"
   fi
 }
 

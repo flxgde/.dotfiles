@@ -1,0 +1,7 @@
+{
+  "SessionStart": ["~/.local/bin/claude-tmux-status waiting"],
+  "UserPromptSubmit": ["~/.local/bin/claude-tmux-status busy"],
+  "Stop": ["~/.local/bin/claude-tmux-status waiting"],
+  "SessionEnd": ["~/.local/bin/claude-tmux-status clear"],
+  "Notification": ["~/.local/bin/claude-tmux-status notify"]
+}

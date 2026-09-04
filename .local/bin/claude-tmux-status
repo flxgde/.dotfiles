@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Records this Claude Code session's busy/waiting state for the tmux pane
+# it's running in, so tmux-session-list can show a live status icon.
+# Wired up via Claude Code hooks in ~/.claude/settings.json:
+#   SessionStart      -> claude-tmux-status waiting
+#   UserPromptSubmit  -> claude-tmux-status busy
+#   Stop              -> claude-tmux-status waiting
+#   SessionEnd        -> claude-tmux-status clear
+#   Notification      -> claude-tmux-status notify
+# No-ops outside tmux (TMUX_PANE unset).
+
+STATUS_DIR="$HOME/.cache/tmux-claude-status"
+
+[ -n "$TMUX_PANE" ] || exit 0
+
+mode=$1
+
+# The Notification hook fires for two very different things: a genuine
+# "I need your permission" prompt, and Claude Code's own idle nudge
+# ("still waiting on you" after ~60s of inactivity) — both look
+# identical from the outside, but only the first deserves a bell; the
+# second is just... still waiting, same as Stop. Claude Code passes the
+# notification's JSON (with a "message" field) on stdin, so use that to
+# tell them apart instead of showing a bell for both.
+if [ "$mode" = notify ]; then
+    mode=$(python3 -c '
+import json, sys
+try:
+    message = json.load(sys.stdin).get("message", "")
+except Exception:
+    message = ""
+print("waiting" if "waiting" in message.lower() else "notify")
+' 2>/dev/null)
+    [ -n "$mode" ] || mode=notify
+fi
+
+case "$mode" in
+    clear) rm -f "$STATUS_DIR/$TMUX_PANE" ;;
+    *)
+        mkdir -p "$STATUS_DIR"
+        printf '%s' "$mode" > "$STATUS_DIR/$TMUX_PANE"
+        ;;
+esac
