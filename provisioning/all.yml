@@ -1,0 +1,14 @@
+---
+# One-shot: run every concern playbook, in the order backup.yml
+# recommends running them. Doesn't include backup.yml itself — run that
+# separately first if you're migrating a machine with real (non-symlink)
+# configs already in place.
+#
+# hyprland.yml is included but guarded (ansible_facts['system'] == 'Linux'
+# in the hyprland role) so it's a safe no-op on macOS.
+- import_playbook: shell.yml
+- import_playbook: tmux.yml
+- import_playbook: terminal.yml
+- import_playbook: neovim.yml
+- import_playbook: hyprland.yml
+- import_playbook: claude.yml

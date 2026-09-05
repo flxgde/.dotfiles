@@ -10,16 +10,24 @@ Supported OS families: `Archlinux`, `Darwin`.
 
 | Playbook       | Concern                                                          |
 |----------------|------------------------------------------------------------------|
+| `all.yml`      | Everything below except `backup.yml` — see below                 |
 | `backup.yml`   | Tarball snapshot of ~/.config, ~/.zshrc, ~/.local/bin            |
 | `shell.yml`    | zsh + oh-my-zsh + .zshrc symlink                                 |
 | `tmux.yml`     | tmux + tpm + tmux.conf symlink                                   |
 | `terminal.yml` | ghostty + config symlink                                         |
 | `neovim.yml`   | neovim + config symlink                                          |
-| `hyprland.yml` | hyprland configs (symlink-only — Omarchy installs hyprland)      |
+| `hyprland.yml` | hyprland configs (symlink-only — Omarchy installs hyprland; Linux-only, guarded so it's a no-op elsewhere) |
+| `claude.yml`   | Claude Code tmux-status hooks, merged into ~/.claude/settings.json |
 
 > **Run `backup.yml` first** before any concern playbook when you're
 > migrating an existing machine — concern playbooks will replace real
 > config dirs with symlinks.
+
+> **One-click setup**: `ansible-playbook all.yml` runs every concern
+> playbook above except `backup.yml` (run that first if migrating a
+> machine with real configs already in place). `hyprland.yml` is
+> included but guarded by `ansible_facts['system'] == 'Linux'`, so it's
+> a safe no-op on macOS.
 
 ## Running
 

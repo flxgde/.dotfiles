@@ -27,6 +27,7 @@ provisioning/               # Per-concern Ansible playbooks: install apps and
 - **Symlink installation**: Configs are symlinked from `~/dotfiles` to their target locations (e.g., `~/.config/nvim`)
 - **Platform-specific**: NVM loads only on non-Darwin systems; SDKMAN loads on Darwin
 - **Tmux-centric workflow**: Sessions managed via fzf-based scripts; history per-session
+- **Provisioning coverage is mandatory**: any new script, config file, or functionality must actually reach a fresh machine through `provisioning/`, not just work after a manual local fix (e.g. hand-symlinking a file). `.local/bin/` scripts and already-symlinked config files are auto-covered by their existing roles; a genuinely new *file* (especially one merged into something a tool rewrites live, like `~/.claude/settings.json`) needs its own role/task — see the `claude` role for that pattern. When finishing work that adds something new, confirm (or state) whether provisioning already covers it.
 
 ## Shell Keybinds (.zshrc)
 

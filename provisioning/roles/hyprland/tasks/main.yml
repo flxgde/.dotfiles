@@ -1,3 +1,4 @@
 ---
 - name: Symlink hypr config files
   ansible.builtin.import_tasks: symlink.yml
+  when: ansible_facts['system'] == 'Linux'
