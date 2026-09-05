@@ -8,13 +8,14 @@ current=$(tmux display-message -p '#S' 2>/dev/null) || exit 0
 
 STATUS_DIR="$HOME/.cache/tmux-claude-status"
 
-all_panes=$(tmux list-panes -a -F '#{session_name} #{pane_id} #{pane_current_command}' 2>/dev/null)
+all_panes=$(tmux list-panes -a -F '#{session_name} #{pane_id} #{window_id} #{pane_current_command}' 2>/dev/null)
 
 best_session=""
 best_pane=""
+best_window=""
 best_rank=0
 
-while read -r s pane cmd; do
+while read -r s pane window cmd; do
   [ -n "$s" ] || continue
   [ "$s" = "$current" ] && continue
   case "$cmd" in
@@ -30,9 +31,10 @@ while read -r s pane cmd; do
   best_rank=$rank
   best_session=$s
   best_pane=$pane
+  best_window=$window
 done <<<"$all_panes"
 
 if [ -n "$best_session" ]; then
-  tmux switch-client -t "$best_session"
   tmux select-pane -t "$best_pane"
+  tmux switch-client -t "$best_session:$best_window"
 fi
