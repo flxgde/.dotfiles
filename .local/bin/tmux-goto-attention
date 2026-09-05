@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Switch straight to the session with the most urgent claude status:
-# 🔔 (notify) beats 💡 (waiting) beats 🤖 (busy). Skips the current
+# 🔔 (notify) beats 💤 (waiting) beats 🤖 (busy). Skips the current
 # session so repeated presses cycle to the next one needing attention.
 # No-op (stays put) if nothing needs attention.
 

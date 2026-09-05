@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# Claude Code statusLine renderer.
+# Wired up via ~/.claude/settings.json -> statusLine.command (see
+# provisioning/roles/claude, which symlinks this in via the local-bin role
+# and points settings.json at it via merge_settings.py).
+#
+# Shows: model, cwd (basename), git branch (+dirty marker), output style,
+# context window usage (with a progress bar), and 5h/7d rate-limit usage
+# when available. Most segments use dimmed ANSI to fit a terminal
+# statusline; the 5h/7d rate-limit numbers are the most important signal
+# so they're rendered bold and color-coded by severity (green/yellow/red)
+# instead of dimmed, so they stand out from the rest of the line.
+
+set -euo pipefail
+
+input=$(cat)
+
+dim() { printf '\033[2m%s\033[0m' "$1"; }
+color() { printf '\033[2;%sm%s\033[0m' "$1" "$2"; }
+bold_color() { printf '\033[1;%sm%s\033[0m' "$1" "$2"; }
+
+# Pick a severity color code (bold ANSI) for a 0-100 usage percentage.
+severity_color() {
+    local pct="$1"
+    local n
+    n=$(printf '%.0f' "$pct")
+    if [ "$n" -ge 85 ]; then
+        printf '31' # bold red
+    elif [ "$n" -ge 60 ]; then
+        printf '33' # bold yellow/orange
+    else
+        printf '32' # bold green
+    fi
+}
+
+# Render a small block-character progress bar for a 0-100 percentage.
+progress_bar() {
+    local pct="$1" width="${2:-10}"
+    local n filled empty bar
+    n=$(printf '%.0f' "$pct")
+    [ "$n" -lt 0 ] && n=0
+    [ "$n" -gt 100 ] && n=100
+    filled=$((n * width / 100))
+    empty=$((width - filled))
+    bar=""
+    for ((i = 0; i < filled; i++)); do bar+="▓"; done
+    for ((i = 0; i < empty; i++)); do bar+="░"; done
+    printf '%s' "$bar"
+}
+
+model=$(jq -r '.model.display_name // empty' <<<"$input")
+effort=$(jq -r '.effort.level // empty' <<<"$input")
+cwd=$(jq -r '.workspace.current_dir // .cwd // empty' <<<"$input")
+dir=$(basename "${cwd:-$PWD}")
+style=$(jq -r '.output_style.name // empty' <<<"$input")
+
+# Git branch + dirty marker (skip optional locks so this never blocks on
+# a concurrent git process; no-op outside a repo).
+branch=""
+if [ -n "${cwd:-}" ] && git -C "$cwd" --no-optional-locks rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    branch=$(git -C "$cwd" --no-optional-locks branch --show-current 2>/dev/null)
+    if [ -n "$branch" ] && [ -n "$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)" ]; then
+        branch="${branch}*"
+    fi
+fi
+
+used=$(jq -r '.context_window.used_percentage // empty' <<<"$input")
+
+five=$(jq -r '.rate_limits.five_hour.used_percentage // empty' <<<"$input")
+five_resets=$(jq -r '.rate_limits.five_hour.resets_at // empty' <<<"$input")
+week=$(jq -r '.rate_limits.seven_day.used_percentage // empty' <<<"$input")
+week_resets=$(jq -r '.rate_limits.seven_day.resets_at // empty' <<<"$input")
+
+# Render "Xh Ym" (or "Ym") remaining until a unix-epoch reset timestamp.
+time_left() {
+    local resets_at="$1" now secs d h m
+    now=$(date +%s)
+    secs=$((resets_at - now))
+    [ "$secs" -lt 0 ] && secs=0
+    d=$((secs / 86400))
+    h=$(((secs % 86400) / 3600))
+    m=$(((secs % 3600) / 60))
+    if [ "$d" -gt 0 ]; then
+        printf '%dd%02dh' "$d" "$h"
+    elif [ "$h" -gt 0 ]; then
+        printf '%dh%02dm' "$h" "$m"
+    else
+        printf '%dm' "$m"
+    fi
+}
+
+parts=()
+if [ -n "$model" ]; then
+    m="🤖 $model"
+    [ -n "$effort" ] && m="$m ($effort)"
+    parts+=("$(color 36 "$m")")
+fi
+[ -n "$dir" ] && parts+=("$(color 34 "📁 $dir")")
+[ -n "$branch" ] && parts+=("$(color 32 "🌿 $branch")")
+[ -n "$style" ] && [ "$style" != "default" ] && parts+=("$(dim "🎨 $style")")
+if [ -n "$used" ]; then
+    bar=$(progress_bar "$used" 10)
+    parts+=("$(dim "🧠 ${bar} $(printf '%.0f' "$used")%")")
+fi
+if [ -n "$five" ]; then
+    c=$(severity_color "$five")
+    text="⏱️ $(printf '%.0f' "$five")%"
+    [ -n "$five_resets" ] && text="$text ($(time_left "$five_resets") left)"
+    parts+=("$(bold_color "$c" "$text")")
+fi
+if [ -n "$week" ]; then
+    c=$(severity_color "$week")
+    text="📅 $(printf '%.0f' "$week")%"
+    [ -n "$week_resets" ] && text="$text ($(time_left "$week_resets") left)"
+    parts+=("$(bold_color "$c" "$text")")
+fi
+
+sep=$(dim " | ")
+out=""
+for p in "${parts[@]}"; do
+    out="${out:+$out$sep}$p"
+done
+
+printf '%s\n' "$out"

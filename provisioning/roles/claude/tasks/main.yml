@@ -6,12 +6,13 @@
     state: directory
     mode: "0755"
 
-- name: Merge dotfiles-managed Claude Code hooks into settings.json
+- name: Merge dotfiles-managed Claude Code hooks and statusLine into settings.json
   become: false
   ansible.builtin.command:
     cmd: >-
       python3 {{ role_path }}/files/merge_hooks.py
       {{ role_path }}/files/hooks.json
       {{ ansible_facts['env']['HOME'] }}/.claude/settings.json
+      --statusline "bash {{ ansible_facts['env']['HOME'] }}/.local/bin/claude-statusline"
   register: claude_hooks_merge
   changed_when: "claude_hooks_merge.stdout.strip() == 'changed'"

@@ -5,7 +5,7 @@
 # shown with those labels instead of a number.
 #
 # Sessions with a live Claude Code pane get a status icon: 🤖 while it's
-# working, 💡 once it's waiting on you — see claude-tmux-status, wired up
+# working, 💤 once it's waiting on you — see claude-tmux-status, wired up
 # via Claude Code hooks in ~/.claude/settings.json, which write one state
 # file per tmux pane. We can't detect "claude" by process name: tmux
 # reports the resolved binary (e.g. the versioned file the `claude`
@@ -44,7 +44,7 @@ claude_icon_for() {
   # all are), dropping/mangling bytes at the boundary.
   local parts=()
   [ -n "$has_notify" ] && parts+=("🔔")
-  [ -n "$has_waiting" ] && parts+=("💡")
+  [ -n "$has_waiting" ] && parts+=("💤")
   [ -n "$has_busy" ] && parts+=("🤖")
   [ "${#parts[@]}" -eq 0 ] && return
   printf ' '
