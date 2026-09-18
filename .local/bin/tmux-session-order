@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Prints all live tmux session names in persisted display order, syncing
+# ~/.cache/tmux-session-order: keeps entries that are still live (in their
+# existing order), drops dead ones, and appends brand-new sessions at the
+# end (in tmux's own listing order). tmux itself has no concept of session
+# order/position (unlike windows, which support move-window) — this file
+# is what lets tmux-numbered-sessions/tmux-session-list agree on one
+# order, and what tmux-swap-numbered-session mutates to "reorder" sessions.
+# No associative arrays here: this runs under macOS's stock bash 3.2.
+
+ORDER_FILE="$HOME/.cache/tmux-session-order"
+mkdir -p "$(dirname "$ORDER_FILE")"
+touch "$ORDER_FILE"
+
+live=$(tmux list-sessions -F '#{session_name}' 2>/dev/null)
+[ -n "$live" ] || exit 0
+
+ordered=()
+while IFS= read -r name; do
+    [ -z "$name" ] && continue
+    grep -qxF "$name" <<<"$live" && ordered+=("$name")
+done <"$ORDER_FILE"
+
+while IFS= read -r name; do
+    [ -z "$name" ] && continue
+    already=""
+    if [ "${#ordered[@]}" -gt 0 ]; then
+        printf '%s\n' "${ordered[@]}" | grep -qxF "$name" && already=1
+    fi
+    [ -n "$already" ] || ordered+=("$name")
+done <<<"$live"
+
+printf '%s\n' "${ordered[@]}" >"$ORDER_FILE"
+printf '%s\n' "${ordered[@]}"

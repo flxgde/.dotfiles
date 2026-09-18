@@ -4,10 +4,16 @@
 # Wired up via Claude Code hooks in ~/.claude/settings.json:
 #   SessionStart      -> claude-tmux-status waiting
 #   UserPromptSubmit  -> claude-tmux-status busy
+#   PreToolUse        -> claude-tmux-status busy
 #   Stop              -> claude-tmux-status waiting
 #   SessionEnd        -> claude-tmux-status clear
 #   Notification      -> claude-tmux-status notify
 # No-ops outside tmux (TMUX_PANE unset).
+#
+# PreToolUse re-marks busy before every tool call. Without it, a
+# Notification fired mid-turn (e.g. a permission prompt while a subagent
+# runs) left the icon stuck on waiting/notify for the rest of the turn,
+# since nothing else reset it back to busy until the next prompt.
 
 STATUS_DIR="$HOME/.cache/tmux-claude-status"
 

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# fzf swap picker for prefix+S. Same numbered list as tmux-session-picker
+# (see tmux-numbered-sessions), minus the current session — picking one
+# swaps it with the current session via tmux-swap-numbered-session.
+
+current=$(tmux display-message -p '#S')
+
+lines=()
+binds=()
+pos=0
+
+add_line() {
+    local label=$1 name=$2
+    pos=$((pos + 1))
+    lines+=("$label) - $name")
+    binds+=("$label:pos($pos)+accept")
+}
+
+i=1
+while read -r s; do
+    [ -z "$s" ] && continue
+    if [ "$s" != "$current" ]; then
+        add_line "$i" "$s"
+    fi
+    i=$((i + 1))
+done < <(~/.local/bin/tmux-numbered-sessions)
+
+[ "${#lines[@]}" -eq 0 ] && exit 0
+
+bind_str=$(IFS=,; echo "${binds[*]}")
+
+selected=$(printf '%s\n' "${lines[@]}" \
+    | fzf \
+        --prompt="Swap with> " \
+        --reverse \
+        --color="header:italic,border:#908caa,pointer:#9ccfd8,marker:#eb6f92" \
+        --border=rounded \
+        --info=hidden \
+        --height=~60% \
+        --bind="$bind_str" \
+    | awk '{print $1}' | tr -d ')')
+
+[ -z "$selected" ] && exit 0
+
+tmux run-shell "~/.local/bin/tmux-swap-numbered-session $selected"

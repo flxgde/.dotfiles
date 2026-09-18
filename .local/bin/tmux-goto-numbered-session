@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Switch directly to the Nth session from tmux-numbered-sessions (used by
+# the Alt+1-9 root-table binds in tmux.conf).
+
+n=$1
+session=$(~/.local/bin/tmux-numbered-sessions | sed -n "${n}p")
+[ -z "$session" ] && exit 0
+
+tmux switch-client -t "$session"

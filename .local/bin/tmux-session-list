@@ -61,7 +61,7 @@ print_session() {
   fi
 }
 
-sessions=$(tmux list-sessions -F '#S' 2>/dev/null)
+sessions=$(~/.local/bin/tmux-session-order)
 
 has_session() {
   local name=$1 s
