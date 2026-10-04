@@ -15,6 +15,7 @@ Supported OS families: `Archlinux`, `Darwin`.
 | `shell.yml`    | zsh + oh-my-zsh + .zshrc symlink                                 |
 | `tmux.yml`     | tmux + tpm + tmux.conf symlink                                   |
 | `terminal.yml` | ghostty or kitty (`-e terminal=kitty`) + config symlink + set as default |
+| `browser.yml`  | firefox, brave or chrome (`-e browser=brave`) + set as default   |
 | `neovim.yml`   | neovim + tree-sitter CLI + Node.js/npm (for Mason) + config symlink |
 | `hyprland.yml` | hyprland configs (symlink-only — the CachyOS Hyprland edition installs hyprland; Linux-only, guarded so it's a no-op elsewhere) |
 | `claude.yml`   | Claude Code tmux-status hooks, merged into ~/.claude/settings.json |
@@ -33,7 +34,7 @@ Supported OS families: `Archlinux`, `Darwin`.
 
 All commands below assume you're inside `provisioning/`. `-K` prompts for
 your sudo password — needed by every playbook that installs packages
-(`shell`, `tmux`, `terminal`, `neovim`, `all`); `backup`, `hyprland` and
+(`shell`, `tmux`, `terminal`, `browser`, `neovim`, `all`); `backup`, `hyprland` and
 `claude` only touch your home directory.
 
 ### Every playbook
@@ -47,19 +48,23 @@ ansible-playbook shell.yml -K                       # zsh + zoxide + .zshrc / ~/
 ansible-playbook tmux.yml -K                        # tmux + tpm + tmux.conf + ~/.local/bin scripts
 ansible-playbook terminal.yml -K                    # ghostty (default) + set as default terminal
 ansible-playbook terminal.yml -K -e terminal=kitty  # kitty + set as default terminal
+ansible-playbook browser.yml -K                     # firefox (default) + set as default browser
+ansible-playbook browser.yml -K -e browser=brave    # brave + set as default browser
+ansible-playbook browser.yml -K -e browser=chrome   # chrome (Chromium on Arch) + set as default
 ansible-playbook neovim.yml -K                      # neovim + tree-sitter CLI + Node.js/npm + config
 ansible-playbook hyprland.yml                       # hypr config symlinks (Linux only)
 ansible-playbook claude.yml                         # Claude Code hooks/statusline + ~/.local/bin scripts
 ```
 
-After switching terminals on Hyprland, run `hyprctl reload` so
-`Super+Return` picks up the new one.
+After switching terminal or browser on Hyprland, run `hyprctl reload` so
+`Super+Return` / `Super+W` pick up the new one.
 
 ### Variables
 
 | Variable   | Playbooks                  | Values                          |
 |------------|----------------------------|---------------------------------|
 | `terminal` | `terminal.yml`, `all.yml`  | `ghostty` (default), `kitty`    |
+| `browser`  | `browser.yml`, `all.yml`   | `firefox` (default), `brave`, `chrome` |
 
 ### Tags
 
@@ -71,11 +76,13 @@ Run part of a playbook with `--tags`:
 | `shell.yml`    | `zsh`                                    |
 | `tmux.yml`     | `tmux`, `local-bin`                      |
 | `terminal.yml` | `ghostty`, `kitty`, `default-terminal`   |
+| `browser.yml`  | `browser`, `browser-install`, `browser-default` |
 | `claude.yml`   | `claude`, `local-bin`                    |
 
 ```bash
 ansible-playbook tmux.yml --tags local-bin                           # only re-link ~/.local/bin scripts
 ansible-playbook terminal.yml -e terminal=kitty --tags default-terminal  # switch default without installing (no sudo)
+ansible-playbook browser.yml -e browser=brave --tags browser-default     # same for the browser
 ```
 
 ### Checking before running

@@ -1,0 +1,13 @@
+---
+- name: Install {{ browser }} (Arch)
+  become: true
+  community.general.pacman:
+    name: "{{ browser_known[browser].pacman }}"
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+
+- name: Install {{ browser }} via Homebrew (macOS)
+  community.general.homebrew_cask:
+    name: "{{ browser_known[browser].cask }}"
+    state: present
+  when: ansible_facts['os_family'] == "Darwin"

@@ -11,14 +11,16 @@ require("config.variables")
 
 -- Override CachyOS defaults (read by config.binds etc., so set before loading them).
 TERMINAL = "ghostty"
-BROWSER  = "brave"
+BROWSER  = "firefox"
 MONITOR1 = "DP-1"
 MONITOR2 = "DP-2"
 PRIMARY_MONITOR = MONITOR1
 
--- Per-machine terminal choice, written by provisioning/terminal.yml
--- (-e terminal=kitty|ghostty). Optional: falls back to ghostty above.
+-- Per-machine terminal/browser choice, written by provisioning/terminal.yml
+-- (-e terminal=kitty|ghostty) and provisioning/browser.yml
+-- (-e browser=firefox|brave|chrome). Optional: fall back to the values above.
 pcall(require, "terminal")
+pcall(require, "browser")
 
 require("config.autostart") -- starts the noctalia shell
 require("config.environment")

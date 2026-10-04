@@ -9,6 +9,7 @@
 - import_playbook: shell.yml
 - import_playbook: tmux.yml
 - import_playbook: terminal.yml
+- import_playbook: browser.yml
 - import_playbook: neovim.yml
 - import_playbook: hyprland.yml
 - import_playbook: claude.yml

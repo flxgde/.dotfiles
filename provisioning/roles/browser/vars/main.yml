@@ -1,0 +1,24 @@
+---
+browser_supported_os_families:
+  - Archlinux
+  - Darwin
+
+# Per-browser facts: Arch package, Homebrew cask, binary Hyprland launches
+# (Super+W), and the .desktop id used as the xdg default browser.
+# "chrome" is Chromium on Arch: Google Chrome is AUR-only.
+browser_known:
+  firefox:
+    pacman: firefox
+    cask: firefox
+    bin: firefox
+    desktop: firefox.desktop
+  brave:
+    pacman: brave-bin
+    cask: brave-browser
+    bin: brave
+    desktop: brave-browser.desktop
+  chrome:
+    pacman: chromium
+    cask: google-chrome
+    bin: chromium
+    desktop: chromium.desktop

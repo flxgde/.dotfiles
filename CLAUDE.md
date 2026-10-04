@@ -53,7 +53,7 @@ provisioning/               # Per-concern Ansible playbooks: install apps and
 | Keybind | Action |
 |---------|--------|
 | `Super + Return` | Terminal (ghostty, or kitty — set by `provisioning/terminal.yml`) |
-| `Super + W` | Browser (brave) — CachyOS default |
+| `Super + W` | Browser (firefox, brave or chrome — set by `provisioning/browser.yml`) |
 | `Super + Q` | Kill window — CachyOS default |
 | `Super + Space` | App launcher (noctalia launcher) |
 | `Super + H/J/K/L` | Move focus (vim-style) |

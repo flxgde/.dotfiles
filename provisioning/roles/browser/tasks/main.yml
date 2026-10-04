@@ -1,0 +1,24 @@
+---
+- name: Fail on unsupported OS family
+  ansible.builtin.assert:
+    that: ansible_facts['os_family'] in browser_supported_os_families
+    fail_msg: >-
+      browser role does not support os_family={{ ansible_facts['os_family'] }}.
+      Supported: {{ browser_supported_os_families | join(', ') }}.
+  tags: [always]
+
+- name: Fail on unknown browser
+  ansible.builtin.assert:
+    that: browser in browser_known
+    fail_msg: >-
+      browser={{ browser }} is not supported.
+      Supported: {{ browser_known.keys() | join(', ') }}.
+  tags: [always]
+
+- name: Install browser
+  ansible.builtin.import_tasks: install.yml
+  tags: [browser-install]
+
+- name: Make it the default browser
+  ansible.builtin.import_tasks: default.yml
+  tags: [browser-default]

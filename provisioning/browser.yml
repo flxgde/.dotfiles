@@ -1,0 +1,15 @@
+---
+# Installs the selected web browser and makes it the default (Hyprland
+# Super+W, xdg default for links). Other browsers are left installed.
+# Switch with:
+#   ansible-playbook browser.yml -K                    # firefox (default)
+#   ansible-playbook browser.yml -K -e browser=brave
+#   ansible-playbook browser.yml -K -e browser=chrome  # Chromium on Arch
+- name: "Web browser (firefox | brave | chrome)"
+  hosts: all
+  gather_facts: true
+  vars:
+    browser: firefox
+  roles:
+    - role: browser
+      tags: [browser]
