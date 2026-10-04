@@ -37,3 +37,25 @@
       Alacritty.desktop
     mode: "0644"
   when: ansible_facts['system'] == "Linux"
+
+# Claude Code's default ("auto") picks its desktop-notification method from
+# the detected terminal, but inside tmux it sees TERM_PROGRAM=tmux and sends
+# nothing. Pinning the channel makes it emit the terminal's notification
+# escape (wrapped for tmux; needs allow-passthrough in tmux.conf).
+- name: Ensure ~/.claude directory exists
+  become: false
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.claude"
+    state: directory
+    mode: "0755"
+
+- name: Set Claude Code preferredNotifChannel to {{ default_terminal_known[terminal].claude_notif_channel }}
+  become: false
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ role_path }}/files/set_json_key.py
+      {{ ansible_facts['env']['HOME'] }}/.claude/settings.json
+      preferredNotifChannel
+      '"{{ default_terminal_known[terminal].claude_notif_channel }}"'
+  register: claude_notif_channel_set
+  changed_when: "claude_notif_channel_set.stdout.strip() == 'changed'"

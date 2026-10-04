@@ -1,10 +1,12 @@
 ---
-# Per-terminal facts: binary Hyprland launches, and the .desktop id
-# xdg-terminal-exec looks up.
+# Per-terminal facts: binary Hyprland launches, the .desktop id
+# xdg-terminal-exec looks up, and Claude Code's preferredNotifChannel.
 default_terminal_known:
   ghostty:
     bin: ghostty
     desktop: com.mitchellh.ghostty.desktop
+    claude_notif_channel: ghostty
   kitty:
     bin: kitty
     desktop: kitty.desktop
+    claude_notif_channel: kitty
