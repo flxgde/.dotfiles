@@ -1,0 +1,10 @@
+---
+# Per-terminal facts: binary Hyprland launches, and the .desktop id
+# xdg-terminal-exec looks up.
+default_terminal_known:
+  ghostty:
+    bin: ghostty
+    desktop: com.mitchellh.ghostty.desktop
+  kitty:
+    bin: kitty
+    desktop: kitty.desktop

@@ -19,27 +19,19 @@ This repository contains my personal configuration files for a clean and customi
 
 ## Installation
 
-1. **Clone the repository:**
+Install CachyOS (or macOS with Homebrew) and `ansible` first, then:
 
 ```bash
-git clone https://github.com/flxg/dotfiles.git ~/dotfiles
+git clone https://github.com/flxgde/.dotfiles.git ~/.dotfiles
+cd ~/.dotfiles/provisioning
+ansible-playbook backup.yml        # optional: snapshot existing configs first
+ansible-playbook all.yml -K        # installs everything and symlinks configs
+```
 
-
-2. **Create symlinks for configuration files:**
-
-ln -sf ~/dotfiles/.zshrc ~/.zshrc
-ln -sf ~/dotfiles/.config/nvim ~/.config/nvim
-ln -sf ~/dotfiles/.config/hypr ~/.config/hypr
-ln -sf ~/dotfiles/.config/ghostty ~/.config/ghostty
-ln -sf ~/dotfiles/.config/tmux ~/.config/tmux
-
-3. **Make scripts executable:**
-
-chmod +x ~/.local/bin/*
-
-4. **Set Zsh as the default shell (optional):**
-
-chsh -s /usr/bin/zsh
+`-K` prompts for your sudo password, which the package-install tasks need.
+Run from inside `provisioning/` so `ansible.cfg` picks up the local inventory.
+See [`provisioning/README.md`](./provisioning/README.md) to run individual
+playbooks.
 
 ---
 

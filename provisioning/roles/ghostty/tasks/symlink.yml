@@ -26,14 +26,3 @@
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/ghostty"
     state: link
     force: true
-
-- name: Set ghostty as default via xdg-terminals.list (ghostty first, alacritty fallback)
-  become: false
-  ansible.builtin.copy:
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/xdg-terminals.list"
-    content: |
-      # Terminal emulator preference order for xdg-terminal-exec
-      # The first found and valid terminal will be used
-      com.mitchellh.ghostty.desktop
-      Alacritty.desktop
-    mode: "0644"

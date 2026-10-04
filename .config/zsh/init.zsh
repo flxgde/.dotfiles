@@ -59,6 +59,11 @@ if [[ $(uname) != "Darwin" ]] && [[ -n "$NVM_DIR" ]]; then
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 fi
 
+# Angular CLI completion (only if ng is installed; after NVM so it's on PATH)
+if command -v ng &> /dev/null; then
+  source <(ng completion script)
+fi
+
 
 # ── keybindings ─────────────────────────────────
 

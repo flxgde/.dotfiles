@@ -1,5 +1,5 @@
-# Dynamic theme (Omarchy theme switcher updates this file at runtime)
-config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
+# Theme
+theme = Catppuccin Macchiato
 
 # Font
 font-family = "DMMono Nerd Font"

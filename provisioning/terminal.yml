@@ -1,7 +1,20 @@
 ---
-- name: "Terminal emulators (ghostty)"
+# Installs the selected terminal emulator, symlinks its config and makes
+# it the default (Hyprland Super+Return, xdg-terminal-exec). The other
+# terminal is left installed. Switch with:
+#   ansible-playbook terminal.yml -e terminal=kitty
+#   ansible-playbook terminal.yml -e terminal=ghostty   # default
+- name: "Terminal emulators (ghostty | kitty)"
   hosts: all
   gather_facts: true
+  vars:
+    terminal: ghostty
   roles:
     - role: ghostty
       tags: [ghostty]
+      when: terminal == "ghostty"
+    - role: kitty
+      tags: [kitty]
+      when: terminal == "kitty"
+    - role: default-terminal
+      tags: [default-terminal]

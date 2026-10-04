@@ -1,0 +1,28 @@
+---
+- name: Ensure ~/.config exists
+  become: false
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config"
+    state: directory
+    mode: "0755"
+
+- name: Stat ~/.config/kitty
+  become: false
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/kitty"
+  register: kitty_config_stat
+
+- name: Remove existing ~/.config/kitty if it's a real directory
+  become: false
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/kitty"
+    state: absent
+  when: kitty_config_stat.stat.exists and kitty_config_stat.stat.isdir and not kitty_config_stat.stat.islnk
+
+- name: Symlink ~/.config/kitty to dotfiles checkout
+  become: false
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/../.config/kitty"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/kitty"
+    state: link
+    force: true

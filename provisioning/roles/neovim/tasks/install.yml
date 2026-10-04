@@ -19,3 +19,33 @@
     name: neovim
     state: present
   when: ansible_facts['os_family'] == "Darwin"
+
+# nvim-treesitter needs the tree-sitter CLI to build parsers
+- name: Install tree-sitter CLI (Arch)
+  become: true
+  community.general.pacman:
+    name: tree-sitter-cli
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+
+- name: Install tree-sitter CLI via Homebrew (macOS)
+  community.general.homebrew:
+    name: tree-sitter-cli
+    state: present
+  when: ansible_facts['os_family'] == "Darwin"
+
+# Mason installs most LSPs/formatters (html, cssls, pyright, prettier, ...) via npm
+- name: Install Node.js and npm (Arch)
+  become: true
+  community.general.pacman:
+    name:
+      - nodejs
+      - npm
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+
+- name: Install Node.js via Homebrew (macOS)
+  community.general.homebrew:
+    name: node
+    state: present
+  when: ansible_facts['os_family'] == "Darwin"

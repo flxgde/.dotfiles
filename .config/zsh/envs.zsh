@@ -17,9 +17,3 @@ fi
 # SDKMAN
 export SDKMAN_DIR="$HOME/.sdkman"
 
-# Omarchy: prepend its bin to PATH when present (no-op elsewhere)
-if [[ -d "$HOME/.local/share/omarchy" ]]; then
-  export OMARCHY_PATH="$HOME/.local/share/omarchy"
-  export PATH="$OMARCHY_PATH/bin:$PATH"
-fi
-

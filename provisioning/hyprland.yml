@@ -1,5 +1,5 @@
 ---
-- name: Hyprland (window manager overlay on Omarchy)
+- name: Hyprland (window manager on CachyOS)
   hosts: localhost
   gather_facts: true
   roles:

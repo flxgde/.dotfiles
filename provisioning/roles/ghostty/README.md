@@ -15,13 +15,6 @@ support there if needed.
 
 ## Default terminal
 
-Writes `~/.config/xdg-terminals.list` with ghostty first, alacritty as
-fallback. `xdg-terminal-exec` (used by Hyprland's `Super+Return` binding
-on Omarchy) then launches ghostty.
-
-## Note on Omarchy overlap
-
-Your dotfiles `ghostty/config` replaces Omarchy's entirely, so features
-like Omarchy's dynamic theming (`config-file = ?"~/.config/omarchy/
-current/theme/ghostty.conf"`) are lost on Omarchy hosts unless you add
-them back to the checked-in config.
+Making ghostty the default (Hyprland `Super+Return`, `xdg-terminals.list`)
+is done by the `default-terminal` role, driven by the `terminal` var in
+`terminal.yml` (default: `ghostty`).

@@ -14,7 +14,8 @@ Personal dotfiles repository containing configurations for a development environ
   nvim/                     # Neovim config (see .config/nvim/CLAUDE.md for details)
   tmux/tmux.conf            # Tmux config (prefix: C-a, vi keys, tpm plugins, theme detection)
   ghostty/config            # Ghostty terminal (auto-detects light/dark theme)
-  hypr/                     # Hyprland override configs (overlay on Omarchy)
+  kitty/kitty.conf          # Kitty terminal (mirrors ghostty; switch via terminal.yml -e terminal=kitty)
+  hypr/                     # Hyprland config: loads CachyOS's ~/.config/hypr/config/*, overrides on top
 .local/bin/                 # Custom scripts
   tmux-sessionizer          # Create/switch tmux sessions from directories
   tmux-switch-session       # Switch between existing tmux sessions
@@ -51,12 +52,12 @@ provisioning/               # Per-concern Ansible playbooks: install apps and
 
 | Keybind | Action |
 |---------|--------|
-| `Super + Return` | Terminal (ghostty) |
-| `Super + B` | Browser (Omarchy default) |
-| `Super + Space` | App launcher (Omarchy walker) |
-| `Super + W` | Kill window (Omarchy default) |
-| `Super + H/J/K/L` | Move focus (vim-style — overrides Omarchy) |
-| `Super + Shift + J/K/L` | Re-homed Omarchy actions displaced by vim nav |
+| `Super + Return` | Terminal (ghostty, or kitty — set by `provisioning/terminal.yml`) |
+| `Super + W` | Browser (brave) — CachyOS default |
+| `Super + Q` | Kill window — CachyOS default |
+| `Super + Space` | App launcher (noctalia launcher) |
+| `Super + H/J/K/L` | Move focus (vim-style) |
+| `Super + Shift + J/L` | Toggle split / lock screen (displaced by vim nav) |
 | `Super + 1-9` | Switch workspace |
 | `Super + Shift + 1-9` | Move window to workspace |
 | `Super + F` | Fullscreen |
@@ -76,4 +77,5 @@ All components use **Catppuccin Macchiato** (dark theme):
 - **Tmux:** Catppuccin macchiato
 - **Nvim:** Catppuccin macchiato with transparent background
 - **Ghostty:** Catppuccin Macchiato
+- **Kitty:** Catppuccin Macchiato
 - **Starship:** Catppuccin Mocha palette

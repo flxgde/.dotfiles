@@ -7,6 +7,3 @@ done
 # Optional per-machine overrides
 [[ -r ~/.aliases ]] && source ~/.aliases
 
-
-# Load Angular CLI autocompletion.
-source <(ng completion script)

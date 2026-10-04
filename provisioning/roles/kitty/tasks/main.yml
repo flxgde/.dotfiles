@@ -1,0 +1,13 @@
+---
+- name: Fail on unsupported OS family
+  ansible.builtin.assert:
+    that: ansible_facts['os_family'] in kitty_supported_os_families
+    fail_msg: >-
+      kitty role does not support os_family={{ ansible_facts['os_family'] }}.
+      Supported: {{ kitty_supported_os_families | join(', ') }}.
+
+- name: Install kitty
+  ansible.builtin.import_tasks: install.yml
+
+- name: Symlink kitty config from dotfiles
+  ansible.builtin.import_tasks: symlink.yml

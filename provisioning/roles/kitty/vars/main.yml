@@ -1,0 +1,4 @@
+---
+kitty_supported_os_families:
+  - Archlinux
+  - Darwin
